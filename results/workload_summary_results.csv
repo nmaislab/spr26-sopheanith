@@ -1,0 +1,10 @@
+Metric,Default Scheduler (Task 1),TOPSIS Scheduler (Task 1),Default Scheduler (Task 2),TOPSIS Scheduler (Task 2)
+Scheduling Latency Mean (s),1,2.33,1,1
+Scheduling Latency Std (s),0,1.89,0,0
+Pod Placement Node,minikube-m02,minikube,minikube-m02,minikube
+Completion Time Mean (s),0.0239,0.0253,0.2589,0.2545
+Completion Time Std (s),0.0185,0.0187,0.0069,0.0101
+CPU Utilization Mean (millicores),42.67,108.67,30.33,108
+CPU Utilization Std (millicores),16.5,3.7,5.9,2.2
+Memory Utilization Mean (Mi),327,1530,285,1127
+Memory Utilization Std (Mi),8.5,10.2,5.1,13.5

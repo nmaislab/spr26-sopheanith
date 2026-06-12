@@ -1,0 +1,7 @@
+task,scheduler,run,node,scheduling_latency_s,completion_time_s,cpu_util_millicores,memory_util_mi
+CNN Inference,Default,1,minikube-m02,1,0.2609,22,278
+CNN Inference,Default,2,minikube-m02,1,0.2662,34,287
+CNN Inference,Default,3,minikube-m02,1,0.2497,35,290
+CNN Inference,TOPSIS,1,minikube,1,0.2539,110,1110
+CNN Inference,TOPSIS,2,minikube,1,0.2425,105,1128
+CNN Inference,TOPSIS,3,minikube,1,0.2672,109,1143

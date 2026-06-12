@@ -1,0 +1,17 @@
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+leaderElection:
+  leaderElect: false
+clientConnection:
+  kubeconfig: "C:\\Users\\nysop\\.kube\\config"
+profiles:
+- schedulerName: topsis-scheduler
+  plugins:
+    multiPoint:
+      enabled:
+      - name: Coscheduling
+    queueSort:
+      enabled:
+      - name: Coscheduling
+      disabled:
+      - name: "*"

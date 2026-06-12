@@ -1,0 +1,7 @@
+task,scheduler,run,node,scheduling_latency_s,completion_time_s,cpu_util_millicores,memory_util_mi
+Linear Regression,Default,1,minikube-m02,1,0.0105,66,315
+Linear Regression,Default,2,minikube-m02,1,0.05,30,332
+Linear Regression,Default,3,minikube-m02,1,0.0111,32,334
+Linear Regression,TOPSIS,1,minikube,5,0.0518,109,1516
+Linear Regression,TOPSIS,2,minikube,1,0.0122,104,1534
+Linear Regression,TOPSIS,3,minikube,1,0.012,113,1540
