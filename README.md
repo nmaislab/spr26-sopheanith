@@ -1,7 +1,9 @@
 # ReasonPod — LLM-Driven Adaptive Kubernetes Scheduling
 
 **Student:** Sopheanith Ny
+
 **Supervisor:** Dr. Eyhab Al-Masri
+
 **Institution:** University of Washington Tacoma
 
 ## Project Description
