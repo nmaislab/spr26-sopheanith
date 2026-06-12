@@ -1,4 +1,4 @@
-# ReasonPod — LLM-Driven Adaptive Kubernetes Scheduling
+# ReasonPod - LLM-Driven Reasoning for Intelligent Resource Scheduling in Edge AIoT Systems
 
 **Student:** Sopheanith Ny
 
