@@ -8,7 +8,7 @@
 
 ## Project Description
 
-ReasonPod is a research project that improves how Kubernetes decides which node to run a workload on. The default Kubernetes scheduler picks nodes based on basic resource availability. ReasonPod replaces that with a smarter approach that combines TOPSIS, a multi-criteria decision algorithm, with a locally deployed large language model through Ollama and etc. The LLM generates dynamic weights for five scheduling criteria: execution time, energy consumption, available CPU, available memory, and resource balance. Instead of treating all five criteria equally, ReasonPod adjusts the weights based on the type of workload being scheduled.
+ReasonPod is a research project that improves how Kubernetes decides which node to run a workload on. The default Kubernetes scheduler picks nodes based on basic resource availability. ReasonPod replaces that with a smarter approach that combines TOPSIS, a multi-criteria decision algorithm, with a locally deployed large language model through Ollama. The LLM generates dynamic weights for five scheduling criteria: execution time, energy consumption, available CPU, available memory, and resource balance. Instead of treating all five criteria equally, ReasonPod adjusts the weights based on the type of workload being scheduled.
 
 This quarter established the behavioral baseline by comparing the default Kubernetes scheduler against the static TOPSIS scheduler across two workload types on a three-node Minikube cluster. The key finding is that TOPSIS consistently chose a different node than the default scheduler across all twelve runs, confirming that TOPSIS makes deliberate multi-criteria decisions rather than simple resource checks. The dynamic LLM weight generation will be integrated during the summer phase.
 
@@ -26,21 +26,25 @@ Both YAML files are in the `workloads/` directory.
 
 ## Required Libraries
 
+The current experiments this quarter do not require any external libraries. Both workloads run entirely on Python's built-in modules inside the python:3.10-slim container image.
+
+The following libraries will be required for the full ReasonPod implementation during the summer phase:
+
 ```bash
 pip install kubernetes requests numpy
 ```
 
-| Library | Version |
-|------------|---------|
-| kubernetes | latest |
-| requests | latest |
-| numpy | latest |
+| Library | Purpose |
+|---|---|
+| kubernetes | Interact with the Kubernetes API programmatically |
+| requests | Send prompts to Ollama's HTTP endpoint |
+| numpy | Numerical calculations in the policy translation module |
 
-Note: PyTorch and TensorFlow are not required. The CNN workload is implemented using only Python's built-in math and random modules.
+> Note: PyTorch and TensorFlow are not required. The CNN workload is implemented using only Python's built-in math and random modules.
 
 ## Environment Setup
 
-- Python 3.12.6
+- Python 3.10 (matches python:3.10-slim container image used in experiments)
 - Minikube v1.37.0
 - kubectl v1.34.1
 - Docker Desktop (required for Minikube driver)
@@ -51,7 +55,7 @@ python -m venv venv
 venv\Scripts\activate        # Windows
 source venv/bin/activate     # Mac/Linux
 
-# Install dependencies
+# Install dependencies (for summer phase)
 pip install kubernetes requests numpy
 ```
 
@@ -113,7 +117,7 @@ kubectl delete pod cnn-topsis
 After each run, capture three things:
 
 ```bash
-# Completion time — printed in pod logs
+# Completion time printed in pod logs
 kubectl logs <pod-name>
 
 # Node placement and scheduling events
@@ -123,7 +127,7 @@ kubectl describe pod <pod-name>
 kubectl top nodes
 ```
 
-Raw experiment logs are stored in `data/` as CSV files. The summary results table with means and standard deviations across all runs is in `results/summary_results.csv`.
+All experiment results are recorded manually from the above commands. The summary results table with means and standard deviations across all runs is included in the June 12 catch-up report.
 
 ## Reproducing Results
 
