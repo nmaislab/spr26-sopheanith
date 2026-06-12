@@ -37,7 +37,7 @@ pip install kubernetes requests numpy
 | Library | Purpose |
 |---|---|
 | kubernetes | Interact with the Kubernetes API programmatically |
-| requests | Send prompts to Ollama's HTTP endpoint |
+| requests | Send prompts to LLM HTTP endpoint |
 | numpy | Numerical calculations in the policy translation module |
 
 > Note: PyTorch and TensorFlow are not required. The CNN workload is implemented using only Python's built-in math and random modules.
