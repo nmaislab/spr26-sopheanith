@@ -16,10 +16,10 @@ This quarter established the behavioral baseline by comparing the default Kubern
 
 No external dataset download is needed. Both workloads are self-contained Python scripts embedded directly inside the pod YAML files.
 
-**Task 1 — Linear Regression (small workload):**
+**Task 1 - Linear Regression (small workload):**
 A Python script that generates 10,000 random data points and computes slope and intercept using ordinary least squares. Resource requests are set to 200m CPU and 128Mi memory.
 
-**Task 2 — CNN Inference Simulation (medium workload):**
+**Task 2 - CNN Inference Simulation (medium workload):**
 A Python script that simulates three convolutional layers with ReLU activations on a 32x32 input followed by a fully connected output layer, written using only the Python standard library. Resource requests are set to 500m CPU and 256Mi memory.
 
 Both YAML files are in the `workloads/` directory.
@@ -80,7 +80,7 @@ You should see the topsis-scheduler pod with a Running status.
 
 ## Running Experiments
 
-**Task 1 — Linear Regression:**
+**Task 1 - Linear Regression:**
 
 ```bash
 # Default scheduler
@@ -94,7 +94,7 @@ kubectl logs linear-regression-topsis
 kubectl delete pod linear-regression-topsis
 ```
 
-**Task 2 — CNN Inference:**
+**Task 2 - CNN Inference:**
 
 ```bash
 # Default scheduler
