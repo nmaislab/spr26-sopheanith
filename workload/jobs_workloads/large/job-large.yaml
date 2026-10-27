@@ -1,0 +1,74 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: workload-large
+spec:
+  completions: 1
+  backoffLimit: 0
+  template:
+    metadata:
+      annotations:
+        task.type: "compute_intensive"
+        task.size: "distributed"
+        task.loc: "435"
+    spec:
+      schedulerName: topsis-scheduler
+      restartPolicy: Never
+      containers:
+      - name: large-cnn
+        image: python:3.10-slim
+        command: ["python", "-c"]
+        args:
+        - |
+          import time, random
+          random.seed(42)
+          start = time.time()
+
+          def make_filters(out_ch, in_ch):
+              return [[[[random.gauss(0, 0.1) for _ in range(3)] for _ in range(3)] for _ in range(in_ch)] for _ in range(out_ch)]
+
+          def conv_relu(inp, filters, size):
+              out_size = size - 2
+              out = []
+              for f in filters:
+                  fmap = []
+                  for i in range(out_size):
+                      row = []
+                      for j in range(out_size):
+                          s = 0.0
+                          for c in range(len(f)):
+                              ch = inp[c]
+                              k = f[c]
+                              for a in range(3):
+                                  r = ch[i + a]
+                                  kr = k[a]
+                                  s += r[j] * kr[0] + r[j + 1] * kr[1] + r[j + 2] * kr[2]
+                          row.append(s if s > 0 else 0.0)
+                      fmap.append(row)
+                  out.append(fmap)
+              return out
+
+          conv1 = make_filters(8, 1)
+          conv2 = make_filters(16, 8)
+          fc = [[random.gauss(0, 0.05) for _ in range(16 * 28 * 28)] for _ in range(10)]
+          images = [[[[random.random() for _ in range(32)] for _ in range(32)]] for _ in range(120)]
+          activations = []
+          preds = []
+          for img in images:
+              a1 = conv_relu(img, conv1, 32)
+              a2 = conv_relu(a1, conv2, 30)
+              flat = [v for fm in a2 for row in fm for v in row]
+              scores = [sum(x * w for x, w in zip(flat, fc[k])) for k in range(10)]
+              preds.append(scores.index(max(scores)))
+              activations.append(a2)
+          end = time.time()
+          print("Workload: large CNN inference,", len(images), "images of 32x32")
+          print("Predictions made:", len(preds))
+          print("Completion time:", round(end - start, 4), "seconds")
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"

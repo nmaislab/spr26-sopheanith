@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: topsis-test-job
+spec:
+  completions: 3
+  parallelism: 3
+  template:
+    metadata:
+      annotations:
+        task.type: "compute_intensive"
+        task.size: "small"
+        task.loc: "110"
+    spec:
+      schedulerName: topsis-scheduler
+      restartPolicy: Never
+      containers:
+      - name: test
+        image: python:3.10-slim
+        command: ["python", "-c", "import socket; print('job ran on pod', socket.gethostname())"]
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"

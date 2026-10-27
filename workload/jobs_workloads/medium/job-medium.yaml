@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: workload-medium
+spec:
+  completions: 1
+  backoffLimit: 0
+  template:
+    metadata:
+      annotations:
+        task.type: "compute_intensive"
+        task.size: "scalable"
+        task.loc: "185"
+    spec:
+      schedulerName: topsis-scheduler
+      restartPolicy: Never
+      containers:
+      - name: medium-regression
+        image: python:3.10-slim
+        command: ["python", "-c"]
+        args:
+        - |
+          import time, random
+          random.seed(42)
+          start = time.time()
+          n = 500000
+          x = [random.uniform(0, 1) for _ in range(n)]
+          y = [3.0 * xi + 1.0 + random.gauss(0, 0.1) for xi in x]
+          w = 0.0
+          b = 0.0
+          lr = 0.5
+          epochs = 20
+          for e in range(epochs):
+              gw = 0.0
+              gb = 0.0
+              for i in range(n):
+                  err = w * x[i] + b - y[i]
+                  gw += err * x[i]
+                  gb += err
+              w -= lr * 2.0 * gw / n
+              b -= lr * 2.0 * gb / n
+          mse = sum((w * x[i] + b - y[i]) ** 2 for i in range(n)) / n
+          end = time.time()
+          print("Workload: medium regression with gradient descent,", n, "points,", epochs, "epochs")
+          print("Weight:", round(w, 4), "Bias:", round(b, 4), "MSE:", round(mse, 4))
+          print("Completion time:", round(end - start, 4), "seconds")
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "1000m"
+            memory: "512Mi"

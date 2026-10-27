@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: workload-small
+spec:
+  completions: 1
+  backoffLimit: 0
+  template:
+    metadata:
+      annotations:
+        task.type: "compute_intensive"
+        task.size: "small"
+        task.loc: "110"
+    spec:
+      schedulerName: topsis-scheduler
+      restartPolicy: Never
+      containers:
+      - name: small-regression
+        image: python:3.10-slim
+        command: ["python", "-c"]
+        args:
+        - |
+          import time, random
+          random.seed(42)
+          start = time.time()
+          n = 10000
+          x = [random.uniform(0, 100) for _ in range(n)]
+          y = [2.5 * xi + random.gauss(0, 1) for xi in x]
+          x_mean = sum(x) / n
+          y_mean = sum(y) / n
+          num = sum((x[i] - x_mean) * (y[i] - y_mean) for i in range(n))
+          den = sum((x[i] - x_mean) ** 2 for i in range(n))
+          slope = num / den
+          intercept = y_mean - slope * x_mean
+          end = time.time()
+          print("Workload: small linear regression,", n, "points")
+          print("Slope:", round(slope, 4), "Intercept:", round(intercept, 4))
+          print("Completion time:", round(end - start, 4), "seconds")
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "500m"
+            memory: "128Mi"
