@@ -23,6 +23,26 @@ So far the baseline is in place. In the spring, the default Kubernetes scheduler
 | | Dynamic weights inside the TOPSIS scheduler |
 | | Full experiments across workload types and competition levels |
 
+## Repository Layout
+
+```
+kubernetes/            scheduler-rbac.yaml and scheduler-deployment.yaml (from GreenCube)
+workload/
+  small_workload/      spring Task 1 pods (linear regression)
+  medium_workload/     spring Task 2 pods (CNN simulation)
+  jobs_workloads/      October Jobs
+    small/             job-small.yaml
+    medium/            job-medium.yaml
+    large/             job-large.yaml
+    topsis-test-job.yaml
+data/                  experiment logs and collected metrics
+figures/               plots
+results/               summary result tables
+README.md
+```
+
+The scheduler source code (TopsisScheduler.java) is not copied into this repo. It lives in the GreenCube repo, and this project uses the prebuilt scheduler image.
+
 ## Code Credit
 
 The TOPSIS scheduler comes from the GreenCube project (https://github.com/nmaislab/GreenCube) by the AERIS Lab. I did not change the scheduling logic.
@@ -54,7 +74,7 @@ A Python script that generates 10,000 random data points and computes slope and 
 **Task 2 - CNN Inference Simulation (medium workload):**
 A Python script that simulates three convolutional layers with ReLU activations on a 32x32 input followed by a fully connected output layer, written using only the Python standard library. Resource requests are set to 500m CPU and 256Mi memory.
 
-Both YAML files are in the `workloads/` directory.
+These YAML files are in `workload/small_workload/` and `workload/medium_workload/`.
 
 ### October workloads (Kubernetes Jobs)
 
@@ -68,11 +88,11 @@ Three Jobs with clearly different resource demands. Each one uses the `python:3.
 | Script run time | about 0.01 s | about 4 s | about 17 s |
 | Total Job time | 8 to 9 s | 15 to 18 s | 21 to 23 s |
 | `task.size` / `task.loc` | small / 110 | scalable / 185 | distributed / 435 |
-| File | `workloads/small/job-small.yaml` | `workloads/medium/job-medium.yaml` | `workloads/large/job-large.yaml` |
+| File | `workload/jobs_workloads/small/job-small.yaml` | `workload/jobs_workloads/medium/job-medium.yaml` | `workload/jobs_workloads/large/job-large.yaml` |
 
 All three Jobs use `completions: 1`, `backoffLimit: 0`, and `restartPolicy: Never`. The total Job time is longer than the script time because it includes the scheduler wait (the scheduler checks for new pods about every 10 seconds) and the container startup.
 
-There is also a small test Job with three pods (100m CPU, 64Mi memory each) that is used to show the scheduler's node choices in its logs: `workloads/test/topsis-test-job.yaml`.
+There is also a small test Job with three pods (100m CPU, 64Mi memory each) that is used to show the scheduler's node choices in its logs: `workload/jobs_workloads/topsis-test-job.yaml`.
 
 ## Required Libraries
 
@@ -139,7 +159,7 @@ You should see the topsis-scheduler pod with a Running status.
 Run the test Job and check which nodes the scheduler picked:
 
 ```bash
-kubectl apply -f workloads/test/topsis-test-job.yaml
+kubectl apply -f workload/jobs_workloads/topsis-test-job.yaml
 kubectl get pods -o wide
 kubectl logs -n kube-system deploy/topsis-scheduler | grep Binding     # Windows PowerShell: Select-String "Binding"
 kubectl delete job topsis-test-job
@@ -155,12 +175,12 @@ Each pod should reach `Completed`, and the scheduler log should print one `Bindi
 
 ```bash
 # Default scheduler
-kubectl apply -f workloads/small_workload/linear-regression-default.yaml
+kubectl apply -f workload/small_workload/linear-regression-default.yaml
 kubectl logs linear-regression-default
 kubectl delete pod linear-regression-default
 
 # TOPSIS scheduler
-kubectl apply -f workloads/small_workload/linear-regression-topsis.yaml
+kubectl apply -f workload/small_workload/linear-regression-topsis.yaml
 kubectl logs linear-regression-topsis
 kubectl delete pod linear-regression-topsis
 ```
@@ -169,12 +189,12 @@ kubectl delete pod linear-regression-topsis
 
 ```bash
 # Default scheduler
-kubectl apply -f workloads/medium_workload/cnn-default.yaml
+kubectl apply -f workload/medium_workload/cnn-default.yaml
 kubectl logs cnn-default
 kubectl delete pod cnn-default
 
 # TOPSIS scheduler
-kubectl apply -f workloads/medium_workload/cnn-topsis.yaml
+kubectl apply -f workload/medium_workload/cnn-topsis.yaml
 kubectl logs cnn-topsis
 kubectl delete pod cnn-topsis
 ```
@@ -184,9 +204,9 @@ kubectl delete pod cnn-topsis
 Run one Job at a time if you want clean timing, since they share the same machine.
 
 ```bash
-kubectl apply -f workloads/small/job-small.yaml
-kubectl apply -f workloads/medium/job-medium.yaml
-kubectl apply -f workloads/large/job-large.yaml
+kubectl apply -f workload/jobs_workloads/small/job-small.yaml
+kubectl apply -f workload/jobs_workloads/medium/job-medium.yaml
+kubectl apply -f workload/jobs_workloads/large/job-large.yaml
 
 # wait about 45 seconds, then check where each pod ran and how long it took
 kubectl get pods -o wide
@@ -264,15 +284,15 @@ kubectl apply -f kubernetes/scheduler-deployment.yaml
 kubectl get pods -n kube-system | grep topsis
 
 # Test Job: confirm TOPSIS schedules pods and logs the node
-kubectl apply -f workloads/test/topsis-test-job.yaml
+kubectl apply -f workload/jobs_workloads/topsis-test-job.yaml
 kubectl get pods -o wide
 kubectl logs -n kube-system deploy/topsis-scheduler | grep Binding
 kubectl delete job topsis-test-job
 
 # Small, medium, and large Jobs
-kubectl apply -f workloads/small/job-small.yaml
-kubectl apply -f workloads/medium/job-medium.yaml
-kubectl apply -f workloads/large/job-large.yaml
+kubectl apply -f workload/jobs_workloads/small/job-small.yaml
+kubectl apply -f workload/jobs_workloads/medium/job-medium.yaml
+kubectl apply -f workload/jobs_workloads/large/job-large.yaml
 kubectl get pods -o wide
 kubectl get jobs
 kubectl logs job/workload-small
@@ -281,26 +301,26 @@ kubectl logs job/workload-large
 kubectl delete job workload-small workload-medium workload-large
 
 # Spring Task 1 - run 3 times per scheduler, delete pod between each run
-kubectl apply -f workloads/small_workload/linear-regression-default.yaml
+kubectl apply -f workload/small_workload/linear-regression-default.yaml
 kubectl logs linear-regression-default
 kubectl describe pod linear-regression-default
 kubectl top nodes
 kubectl delete pod linear-regression-default
 
-kubectl apply -f workloads/small_workload/linear-regression-topsis.yaml
+kubectl apply -f workload/small_workload/linear-regression-topsis.yaml
 kubectl logs linear-regression-topsis
 kubectl describe pod linear-regression-topsis
 kubectl top nodes
 kubectl delete pod linear-regression-topsis
 
 # Spring Task 2 - run 3 times per scheduler, delete pod between each run
-kubectl apply -f workloads/medium_workload/cnn-default.yaml
+kubectl apply -f workload/medium_workload/cnn-default.yaml
 kubectl logs cnn-default
 kubectl describe pod cnn-default
 kubectl top nodes
 kubectl delete pod cnn-default
 
-kubectl apply -f workloads/medium_workload/cnn-topsis.yaml
+kubectl apply -f workload/medium_workload/cnn-topsis.yaml
 kubectl logs cnn-topsis
 kubectl describe pod cnn-topsis
 kubectl top nodes
